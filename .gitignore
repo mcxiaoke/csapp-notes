@@ -1,0 +1,13 @@
+*
+!.gitattributes
+!.gitignore
+!readme.md
+!.gitkeep
+!*.h
+!*.c
+!*.hpp
+!*.cpp
+!*.asm
+!*/
+
+// https://stackoverflow.com/questions/11852558
