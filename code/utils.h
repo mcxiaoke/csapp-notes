@@ -2,8 +2,10 @@
 #define __MCX_UTILS_HEADER__
 
 #include <inttypes.h>
-#include <limits.h> /* for CHAR_BIT */
+#include <limits.h>
+#include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #ifndef CHAR_BIT
@@ -27,7 +29,17 @@
       (byte & 0x08 ? '1' : '0'), (byte & 0x04 ? '1' : '0'),      \
       (byte & 0x02 ? '1' : '0'), (byte & 0x01 ? '1' : '0')
 
+typedef unsigned char* bp;
+
+void show_bytes(bp start, size_t len) {
+  for (size_t i = 0; i < len; i++) {
+    printf("%.2x ", start[i]);
+  }
+  printf(" (%ldb)\n", len);
+}
+
 void show_endian() {
+  printf("Int Size: %ld, Pointer Size: %ld\n", sizeof(int), sizeof(void*));
   int x = 0x1234;
   char* p = (char*)&x;
   if (p[0] == 0x34 && p[1] == 0x12) {
@@ -73,16 +85,63 @@ void show_binary(int* pval) {
   show_byte_binary(start, len);
 }
 
+void show_bits_by_byte(int val, int size) {
+  // 这里是按实际值从高位到低位打印
+  // high bit to low bit (littble endian)
+  for (size_t i = size; i > 0; i--) {
+    printf(BYTE_TO_BIN " ", BIN_FMT(val >> (i - 1) * 8));
+  }
+  printf("(0x%08x = %d)\n", val, val);
+}
+
+void show_bits_auto(int val) {
+  int x = abs(val - 1);
+  // 这里是按实际值从高位到低位打印
+  // high bit to low bit (littble endian)
+  if (x < 0xff) {
+    show_bits_by_byte(val, 1);
+  } else if (x < 0xffff) {
+    show_bits_by_byte(val, 2);
+  } else if (x < 0xffffff) {
+    show_bits_by_byte(val, 3);
+  } else {
+    show_bits_by_byte(val, 4);
+  }
+}
+
 void show_bits(int val) {
   // 这里是按实际值从高位到低位打印
   // high bit to low bit (littble endian)
   //   printf("Int ORG: dec:%d hex:0x%x addr:%p\n", val, val, pval);
-  //   printf("Int HEX: %4x %4x %4x %4x %4x %4x %4x %4x\n", val >> 28 & 0x0f,
-  //          val >> 24 & 0x0f, val >> 20 & 0x0f, val >> 16 & 0x0f, val >> 12 &
-  //          0x0f, val >> 8 & 0x0f, val >> 4 & 0x0f, val & 0x0f);
-  printf(
-      "BIN: " BYTE_TO_BIN " " BYTE_TO_BIN " " BYTE_TO_BIN " " BYTE_TO_BIN "\n",
-      BIN_FMT(val >> 24), BIN_FMT(val >> 16), BIN_FMT(val >> 8), BIN_FMT(val));
+  show_bits_by_byte(val, sizeof(int));
+}
+
+void show_hex_by_byte(int val, int size) {
+  for (size_t i = size; i > 0; i--) {
+    printf("%-4x %-4x ", val >> ((i - 1) * 8 + 4) & 0x0f,
+           val >> (i - 1) * 8 & 0x0f);
+  }
+  printf("(0x%08x = %d)\n", val, val);
+}
+
+void show_hex_auto(int val) {
+  int x = abs(val - 1);
+  if (x < 0xff) {
+    show_hex_by_byte(val, 1);
+  } else if (x < 0xffff) {
+    show_hex_by_byte(val, 2);
+  } else if (x < 0xffffff) {
+    show_hex_by_byte(val, 3);
+  } else {
+    show_hex_by_byte(val, 4);
+  }
+}
+
+void show_hex(int val) { show_hex_by_byte(val, sizeof(int)); }
+
+void show_bits_p(const char* prefix, int val) {
+  printf("%s\t", prefix);
+  show_bits(val);
 }
 
 #endif /* __MCX_UTILS_HEADER__ */

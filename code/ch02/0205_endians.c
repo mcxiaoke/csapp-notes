@@ -4,20 +4,11 @@
 
 #include "../utils.h"
 
-typedef unsigned char* bp;
-
 void show_single_char(const char* s) {
   for (size_t i = 0; i < strlen(s); i++) {
     printf("%2c ", s[i]);
   }
   printf(" (%ldb)\n", strlen(s));
-}
-
-void show_bytes(bp start, size_t len) {
-  for (size_t i = 0; i < len; i++) {
-    printf("%.2x ", start[i]);
-  }
-  printf(" (%ldb)\n", len);
 }
 
 void show_int(int x) {
